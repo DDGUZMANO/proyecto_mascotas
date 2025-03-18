@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Usuario {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  surname    String?
+  email      String   @unique
+  telefono   String?
+  password   String
+  role       String?   // "Dueño", "admin" o "Cuidador" 
+  active     Boolean @default(true)
+  accepNotifications Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  bio                String?
+  location           String?
+  avatar             String?
+  verified           Boolean  @default(false)
+  mascotas   Mascota[]
+  cuidadores Cuidador[]
+  valoraciones Valoracion[]
+}
+
+model Mascota {
+  id                   Int      @id @default(autoincrement())
+  nombre               String
+  raza                 String
+  tamanio              String
+  edad                 Float
+  tipo_alimentacion    String
+  necesidades_especiales Boolean
+  ubicacion            String
+  dueñoId              Int
+  dueño                Usuario @relation(fields: [dueñoId], references: [id])
+}
+
+model Cuidador {
+  id                      Int      @id @default(autoincrement())
+  usuarioId               Int
+  usuario                 Usuario  @relation(fields: [usuarioId], references: [id])
+  experiencia             Int
+  tarifas                 Float
+  ubicacion               String
+  descripcion             String?
+  tamanio_mascota_aceptada String
+  valoraciones            Valoracion[]
+  tiposMascotas           TiposMascotasCuidador[]
+}
+
+model TiposMascotasCuidador {
+  id         Int      @id @default(autoincrement())
+  cuidadorId Int
+  cuidador   Cuidador @relation(fields: [cuidadorId], references: [id])
+  tipo       String   // Perro, Gato, Ave, Roedor
+}
+
+model Valoracion {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int
+  usuario     Usuario @relation(fields: [usuarioId], references: [id])
+  cuidadorId  Int
+  cuidador    Cuidador @relation(fields: [cuidadorId], references: [id])
+  calificacion Int   // 1 a 5 estrellas
+  comentario  String?
+}
